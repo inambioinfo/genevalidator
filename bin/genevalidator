@@ -194,9 +194,10 @@ BANNER
   end
 end
 
-subcommands = {
-  'app' => OptionParser.new do |opts|
-    opts.banner = <<BANNER
+subcommands = {}
+app_opts = {}
+subcommands['app'] = OptionParser.new do |opts|
+  opts.banner = <<BANNER
 SUMMARY:
   Launch GeneValidator as a web application
 
@@ -215,116 +216,118 @@ Examples:
 
 BANNER
 
-    opts.separator 'MANDATORY ARGUMENTS'
-    opts.separator ' '
+  opts.separator 'MANDATORY ARGUMENTS'
+  opts.separator ' '
 
-    opts.on('-d', '--database_dir [PATH]',
-            'Path to the directory containing BLAST database') do |path|
-      opt[:database_dir] = path
-    end
+  opts.on('-d', '--database_dir [PATH]',
+          'Path to the directory containing BLAST database') do |path|
+    app_opts[:database_dir] = path
+  end
 
-    opts.separator ' '
-    opts.separator 'OPTIONAL ARGUMENTS'
-    opts.separator ' '
+  opts.separator ' '
+  opts.separator 'OPTIONAL ARGUMENTS'
+  opts.separator ' '
 
-    opts.on('-g', '--serve_public_dir [PATH]',
-            'Web Accessible Directory - this is where GV files will',
-            'be stored so that they are accessible to the app.',
-            'Default location: $HOME/.genevalidatorapp') do |path|
-      opt[:serve_public_dir] = path
-    end
+  opts.on('-g', '--serve_public_dir [PATH]',
+          'Web Accessible Directory - this is where GV files will',
+          'be stored so that they are accessible to the app.',
+          'Default location: $HOME/.genevalidatorapp') do |path|
+    app_opts[:serve_public_dir] = path
+  end
 
-    opts.on('-H', '--host [HOST]',
-            'Host to run GeneValidatorApp on') do |host|
-      opt[:host] = host
-    end
+  opts.on('-H', '--host [HOST]',
+          'Host to run GeneValidatorApp on') do |host|
+    app_opts[:host] = host
+  end
 
-    opts.on('-p', '--port [PORT]',
-            'Port to run GeneValidatorApp on') do |port|
-      opt[:port] = port
-    end
+  opts.on('-p', '--port [PORT]',
+          'Port to run GeneValidatorApp on') do |port|
+    app_opts[:port] = port
+  end
 
-    opt[:ssl] = false
-    opts.on('--ssl',
-            'Use HTTPS:// instead of HTTP:// links ') do
-      opt[:ssl] = true
-    end
+  app_opts[:ssl] = false
+  opts.on('--ssl',
+          'Use HTTPS:// instead of HTTP:// links ') do
+    app_opts[:ssl] = true
+  end
 
-    opt[:max_characters] = 'undefined'
-    opts.on('--max_char_input [NUM]',
-            'Limit the number of characters (i.e. input sequence) inputted',
-            'into the app') do |num|
-      opt[:max_characters] = num
-    end
+  app_opts[:max_characters] = 'undefined'
+  opts.on('--max_char_input [NUM]',
+          'Limit the number of characters (i.e. input sequence) inputted',
+          'into the app') do |num|
+    app_opts[:max_characters] = num
+  end
 
-    opts.separator ' '
-    opts.separator '# BLAST DATABASES ARGUMENTS'
-    opts.separator ' '
+  opts.separator ' '
+  opts.separator '# BLAST DATABASES ARGUMENTS'
+  opts.separator ' '
 
-    opts.on('-f', '--default_database_path  [PATH]',
-            'Path to the default BLAST database') do |path|
-      opt[:default_database_path] = path
-    end
+  opts.on('-f', '--default_database_path  [PATH]',
+          'Path to the default BLAST database') do |path|
+    app_opts[:default_database_path] = path
+  end
 
-    opts.on('-l', '--list_databases',
-            'List found BLAST databases') do
-      opt[:list_databases] = true
-    end
+  opts.on('-l', '--list_databases',
+          'List found BLAST databases') do
+    app_opts[:list_databases] = true
+  end
 
-    opts.separator ' '
-    opts.separator '# CONFIG FILE ARGUMENTS'
-    opts.separator ' '
+  opts.separator ' '
+  opts.separator '# CONFIG FILE ARGUMENTS'
+  opts.separator ' '
 
-    opts.on('-c', '--config_file [PATH]',
-            'Path to the directory containing BLAST database',
-            'Default location: $HOME/.genevalidatorapp.conf') do |path|
-      opt[:config_file] = path
-    end
+  opts.on('-c', '--config_file [PATH]',
+          'Path to the directory containing BLAST database',
+          'Default location: $HOME/.genevalidatorapp.conf') do |path|
+    app_opts[:config_file] = path
+  end
 
-    opts.on('-s', '--set',
-            'Set configuration value in default or given config file',
-            '(i.e. current save current options to config file)') do
-      opt[:set] = true
-    end
+  opts.on('-s', '--set',
+          'Set configuration value in default or given config file',
+          '(i.e. current save current options to config file)') do
+    app_opts[:set] = true
+  end
 
-    opts.separator ' '
-    opts.separator '# GENERAL ARGUMENTS'
-    opts.separator ' '
+  opts.separator ' '
+  opts.separator '# GENERAL ARGUMENTS'
+  opts.separator ' '
 
-    opt[:num_threads] = 1
-    opts.on('-n', '--num_threads [THREADS]',
-            'Specify the number of processor threads to use when running',
-            'BLAST and GeneValidator.') do |num_threads|
-      opt[:num_threads] = num_threads
-    end
+  app_opts[:num_threads] = 1
+  opts.on('-n', '--num_threads [THREADS]',
+          'Specify the number of processor threads to use when running',
+          'BLAST and GeneValidator.') do |num_threads|
+    app_opts[:num_threads] = num_threads
+  end
 
-    opt[:mafft_threads] = 1
-    opts.on('-m', '--mafft_threads [THREADS]',
-            'Specify the number of processor threads to use when running',
-            'Mafft. Note Mafft is run independently in each of the threads',
-            'specified in --num_threads.') do |mafft_threads|
-      opt[:mafft_threads] = mafft_threads
-    end
+  app_opts[:mafft_threads] = 1
+  opts.on('-m', '--mafft_threads [THREADS]',
+          'Specify the number of processor threads to use when running',
+          'Mafft. Note Mafft is run independently in each of the threads',
+          'specified in --num_threads.') do |mafft_threads|
+    app_opts[:mafft_threads] = mafft_threads
+  end
 
-    opts.on('-b', '--bin [PATH]', Array,
-            'Path to BLAST and MAFFT bin folders (is added to $PATH variable)',
-            'To be provided as follows:',
-            'e.g.   genevalidator -b /blast/bin/path/ -b /mafft/bin/path/') do |bin|
-      (opt[:bin] ||= []).concat(bin)
-    end
+  opts.on('-b', '--bin [PATH]', Array,
+          'Path to BLAST and MAFFT bin folders (is added to $PATH variable)',
+          'To be provided as follows:',
+          'e.g.   genevalidator -b /blast/bin/path/ -b /mafft/bin/path/') do |bin|
+    (app_opts[:bin] ||= []).concat(bin)
+  end
 
-    opts.on('-D', '--devel',
-            'Start GeneValidatorApp in development mode') do
-      opt[:devel] = true
-    end
+  opts.on('-D', '--devel',
+          'Start GeneValidatorApp in development mode') do
+    app_opts[:devel] = true
+  end
 
-    opts.on('-h', '--help', 'Show this screen.') do
-      puts subcommands['app']
-      exit
-    end
-  end,
-  'serve' => OptionParser.new do |opts|
-    opts.banner = <<BANNER
+  opts.on('-h', '--help', 'Show this screen.') do
+    puts subcommands['app']
+    exit
+  end
+end
+
+serve_opt = {}
+subcommands['serve'] = OptionParser.new do |opts|
+  opts.banner = <<BANNER
 SUMMARY:
   Create a web server for viewing results
 
@@ -333,19 +336,20 @@ USAGE:
 
 ARGUMENTS:
 BANNER
-    opt[:file_server_port] = 6789
-    opts.on('-p', '--port [PORT]',
-            'Port to run the server on') do |port|
-      opt[:file_server_port] = port
-    end
+  serve_opt[:file_server_port] = 6789
+  opts.on('-p', '--port [PORT]',
+          'Port to run the server on') do |port|
+    serve_opt[:file_server_port] = port
+  end
 
-    opts.on('-h', '--help', 'Show this screen.') do
-      puts subcommands['serve']
-      exit
-    end
-  end,
-  'ncbi-blast-dbs' => OptionParser.new do |opts|
-    opts.banner = <<BANNER
+  opts.on('-h', '--help', 'Show this screen.') do
+    puts subcommands['serve']
+    exit
+  end
+end
+
+subcommands['ncbi-blast-dbs'] = OptionParser.new do |opts|
+  opts.banner = <<BANNER
 SUMMARY:
   Fast download BLAST databases from NCBI
 
@@ -368,12 +372,11 @@ USAGE:
 OPTIONS:
 BANNER
 
-    opts.on('-h', '--help', 'Show this screen.') do
-      puts subcommands['ncbi-blast-dbs']
-      exit
-    end
+  opts.on('-h', '--help', 'Show this screen.') do
+    puts subcommands['ncbi-blast-dbs']
+    exit
   end
-}
+end
 
 begin
   global.order!
@@ -387,42 +390,44 @@ rescue OptionParser::ParseError
   exit 1
 end
 
-if command.nil? && opt[:extract_raw_seqs] && opt[:raw_sequences].nil?
-  require 'genevalidator'
-  require 'genevalidator/get_raw_sequences'
-  blast_file = opt[:blast_xml_file] if opt[:blast_xml_file]
-  blast_file = opt[:blast_tabular_file] if opt[:blast_tabular_file]
-  fname = File.basename(blast_file, File.extname(blast_file))
-  GeneValidator.opt    = opt
-  GeneValidator.config = {}
-  output_dir = GeneValidator.make_output_dir(fname)
-  GeneValidator.dirs   = { tmp_dir: output_dir }
-  GeneValidator::RawSequences.run
-  warn '==> The BLAST HSP raw sequence FASTA files have been saved to:'
-  warn "     #{output_dir}"
-elsif command.nil? && opt[:json_file]
-  start = Time.now
-  require 'genevalidator/json_to_gv_results'
-  GeneValidator::JsonToGVResults.init(opt)
-  GeneValidator::JsonToGVResults.run
-  warn "Total running time: #{(Time.now - start).round(3)}s"
-  warn '' # a blank line
-elsif command.nil?
-  start = Time.now
-  opt[:input_fasta_file] = first_arg
-  if opt[:input_fasta_file].nil?
-    warn '' # a blank line
-    warn '==> Error: Input Fasta file required.'
-    warn '' # a blank line
-    puts global
-    exit 1
+start = Time.now
+
+if command.nil?
+  if opt[:extract_raw_seqs] && opt[:raw_sequences].nil?
+    require 'genevalidator'
+    require 'genevalidator/get_raw_sequences'
+    blast_file = opt[:blast_xml_file] if opt[:blast_xml_file]
+    blast_file = opt[:blast_tabular_file] if opt[:blast_tabular_file]
+    fname = File.basename(blast_file, File.extname(blast_file))
+    GeneValidator.opt    = opt
+    GeneValidator.config = {}
+    output_dir = GeneValidator.make_output_dir(fname)
+    GeneValidator.dirs = { tmp_dir: output_dir }
+    GeneValidator::RawSequences.run
+    warn '==> The BLAST HSP raw sequence FASTA files have been saved to:'
+    warn "     #{output_dir}"
+
+  elsif opt[:json_file]
+    require 'genevalidator/json_to_gv_results'
+    GeneValidator::JsonToGVResults.init(opt)
+    GeneValidator::JsonToGVResults.run
+
+  else
+    start = Time.now
+    opt[:input_fasta_file] = first_arg
+    if opt[:input_fasta_file].nil?
+      warn '' # a blank line
+      warn '==> Error: Input Fasta file required.'
+      warn '' # a blank line
+      puts global
+      exit 1
+    end
+    require 'genevalidator'
+    opt[:output_formats] = 'fasta' if opt[:select_single_best]
+    GeneValidator.init(opt)
+    GeneValidator.run
   end
-  require 'genevalidator'
-  opt[:output_formats] = 'fasta' if opt[:select_single_best]
-  GeneValidator.init(opt)
-  GeneValidator.run
-  warn "Total running time: #{(Time.now - start).round(3)}s"
-  warn '' # a blank line
+
 elsif command == 'serve'
   require 'rack'
 
@@ -457,11 +462,13 @@ elsif command == 'serve'
     puts subcommands['serve']
     exit 1
   end
+
   index_file = File.basename(html_files.min)
   app = Rack::Static.new nil, urls: [''], root: dir, index: index_file
-  Rack::Server.start app: app, Port: opt[:file_server_port], StartCallback: proc {
-    open_in_browser("http://localhost:#{opt[:file_server_port]}")
-  }
+  url = "http://localhost:#{serve_opt[:file_server_port]}"
+  Rack::Server.start app: app, Port: serve_opt[:file_server_port],
+                     StartCallback: proc { open_in_browser(url) }
+
 elsif command == 'ncbi-blast-dbs'
   require 'rake'
   load 'ncbi-blast-dbs.rake'
@@ -471,7 +478,7 @@ elsif command == 'ncbi-blast-dbs'
   Rake.application.top_level
 
 elsif command == 'app'
-  ENV['RACK_ENV'] = 'development' if opt[:devel]
+  ENV['RACK_ENV'] = 'development' if app_opts[:devel]
 
   # Exit gracefully on SIGINT.
   stty = `stty -g`.chomp
@@ -485,7 +492,7 @@ elsif command == 'app'
   require 'genevalidatorapp'
 
   begin
-    GeneValidatorApp.init opt
+    GeneValidatorApp.init app_opts
 
     # The aim of following error recovery scenarios is to guide user to a
     # working GeneValidatorApp installation. We expect to land following
@@ -497,33 +504,33 @@ elsif command == 'app'
   rescue GeneValidatorApp::NUM_THREADS_INCORRECT => e
     warn e
 
-    if opt[:num_threads].nil?
+    if app_opts[:num_threads].nil?
       warn 'You can set the correct value by running:'
-      warn
+      warn '' # a blank line
       warn '  genevalidator app -s -n <value>'
-      warn
+      warn '' # a blank line
     end
 
     exit!
   rescue GeneValidatorApp::BIN_DIR_NOT_FOUND => e
     warn e
 
-    if opt[:bin].nil?
+    if app_opts[:bin].nil?
       warn 'You can set the correct value by running:'
-      warn
+      warn '' # a blank line
       warn '  genevalidator app -s -b <value>'
-      warn
+      warn '' # a blank line
     end
 
     exit!
   rescue GeneValidatorApp::DATABASE_DIR_NOT_FOUND => e
     warn e
 
-    if opt[:database_dir].nil?
+    if app_opts[:database_dir].nil?
       warn 'You can set the correct value by running:'
-      warn
+      warn '' # a blank line
       warn '  genevalidator app -s -d <value>'
-      warn
+      warn '' # a blank line
     end
 
     exit!
@@ -549,15 +556,18 @@ MSG
     exit!
   end
 
-  if opt[:list_databases]
+  if app_opts[:list_databases]
     puts GeneValidatorApp::Database.all
     exit
   end
 
-  if opt[:set]
+  if app_opts[:set]
     GeneValidatorApp.config.write_config_file
     exit
   end
 
   GeneValidatorApp.run
 end
+
+warn "Total running time: #{(Time.now - start).round(3)}s"
+warn '' # a blank line
